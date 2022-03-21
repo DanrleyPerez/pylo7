@@ -11,7 +11,7 @@ def indice_palavra_string(arquivo, palavra):
     return indice
 
 
-def quantidadeDeProdutos(termo_de_interesse):
+def quantidade_de_produtos(termo_de_interesse):
     req = requests.request('GET', """https://www.elo7.com.br/lista/""" + termo_de_interesse + """?pageNum=1""")
     conteudo = str(req.content)
     n = 0
@@ -25,15 +25,21 @@ def quantidadeDeProdutos(termo_de_interesse):
                 qte_produtos = qte_produtos + letra
             except:
                 pass
-    print("quantidade de produtos: ", qte_produtos)
+    print("quantidade de produtos: listados ", qte_produtos)
     return int(qte_produtos)
 
 
-def numeroDePaginas(produto):
+def numero_de_paginas(produto):
 
-    concate = quantidadeDeProdutos(produto)
+    concate = quantidade_de_produtos(produto)
 
-    numero_paginas = int(int(concate)/39)
+    numero_paginas = int(concate)/39
+    if int(concate) % 39 == 0:
+        numero_paginas = int(numero_paginas)
+    elif int(concate) < 39:
+        numero_paginas = 1
+    else:
+        numero_paginas = int(numero_paginas + 1)
     return numero_paginas
 
 
@@ -44,83 +50,96 @@ def captura_pagina(termo_interesse, n_pagina):
     return conteudo
 
 
-def produtosDaPagina(pagina):
+def produtos_da_pagina(pagina):
     indice = indice_palavra_string(pagina, "products") + len("products") + 2
     fim = len(pagina)
-    print("caracteres pagina:",fim)
     conc = ""
-    numero_aspas = 0
-    armazenamento = 0
     cont = 0
-    terceira_aspas =[]
     for e in range(indice, fim):
         cont += 1
-
-
         if pagina[e-1] == ']' and pagina[e-7] != 'I' and pagina[e-6] != 'm' and pagina[e-5] != 'a' and pagina[e-4] != 'g':
             break
-
         else:
-            if numero_aspas == 2 and pagina[e] != ":" and pagina[e] != ",":
-                conc = conc + pagina[e]
-                armazenamento = len(conc) - 2
-                numero_aspas = 0
-                terceira_aspas = True
-
-            elif terceira_aspas == True and pagina[e] == '"':
-                conc = conc + pagina[e]
-                armazenamento = len(conc) - 1
-                numero_aspas = 0
-                terceira_aspas = False
-
-            elif numero_aspas == 2 and pagina[e] == ":" or pagina[e] == ",":
-                conc = conc + pagina[e]
-                numero_aspas = 0
-            else:
-                conc = conc + pagina[e]
-            if pagina[e] == '"':
-                numero_aspas += 1
-
-        if armazenamento != 0:
-            conc = conc[:armazenamento] + "'" + conc[armazenamento: +1]
-
-
+            conc = conc + pagina[e]
     return conc
 
 
-def todosProdutos():
+def todos_produtos(produto_interesse):
     todos_produtos = []
-    produto_interesse = input()
-    numero_paginas = numeroDePaginas(produto_interesse)
+
+    numero_paginas = numero_de_paginas(produto_interesse)
     print("numero de paginas", numero_paginas)
-    for i in range(1, 50):
+    for i in range(0, 51):
         print("pagina = ", i)
         conteudo_pagina = captura_pagina(produto_interesse, i)
-        produtos_pagina = produtosDaPagina(conteudo_pagina)
+        produtos_pagina = produtos_da_pagina(conteudo_pagina)
 
         todos_produtos.append(produtos_pagina)
 
+    produtos_em_lista = tratamento_string(str(todos_produtos))
+    print(len(produtos_em_lista), " produtos encontrados")
+    return produtos_em_lista
 
-    return todos_produtos
+
+def tratamento_string(produtos):
+    prod = produtos.strip("[]")
+    prod = prod.split("}")
+    list_produtos_organizada = []
+    n = 0
+    conc = ""
+    dict_produtos_organizada = {}
+    for a in prod:
+        n += 1
+
+        if n == len(prod):
+            pass
+        else:
+            a = str(a).strip("'")
+            a = a.strip("[") + "}"
+            a = a.replace("'", "")
+            a = a.replace("]", "")
+            a = a.replace("[", "")
+            if a[0] == ",":
+                a = a.replace(",", "", 1)
+            a = a.replace("]", "", len(a))
+            a = a.replace("'[", "", 1)
+            qte_aspas = a.count('"')
+            if qte_aspas > 10:
+                a = a.replace('"', "", 8)
+                qte_aspas = a.find('"')
+                if qte_aspas > 10:
+                    a = a.replace('"', "", 8)
+
+            try:
+                a = ast.literal_eval(a)
+                list_produtos_organizada.append(a)
+            except:
+                pass
+    return list_produtos_organizada
 
 
-class vendasDeSucesso():
+class VendasDeSucesso:
+    def __init__(self, termo):
+        self.termo = termo
 
-    def produtosDeSucesso(self):
-        produtos = todosProdutos()
-        return produtos
-        # for i in range(self.quantidade_produtos):
-        #     primeirosProd = self.todos_produtos[0][i]
+    def produtos_de_sucesso(self):
+        todos_os_produtos = todos_produtos(self.termo)
+        return todos_os_produtos
 
     def tags_de_sucesso(self):
         pass
 
 
 def run():
-    venda_interesse1 = vendasDeSucesso()
-    produtos_relevantes = venda_interesse1.produtosDeSucesso()
+    termo = input(" Digite o Produto que busca ")
+    prod = VendasDeSucesso(termo)
+    melhores_produtos = prod.produtos_de_sucesso()
+    print(melhores_produtos[0]['name'])
 
-run()
+
+if __name__ == '__main__':
+    run()
+
 """
 pytrends = TrendReq(hl='en-US', tz=360)
 
