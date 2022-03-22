@@ -1,5 +1,4 @@
 import pandas as pd
-from pytrends.request import TrendReq
 import requests
 import re
 import ast
@@ -176,13 +175,4 @@ def run():
 
 if __name__ == '__main__':
     run()
-
-"""
-pytrends = TrendReq(hl='en-US', tz=360)
-
-kw_list = ["love", "hate"]
-pytrends.build_payload(kw_list, cat=0, timeframe='today 5-y', geo='', gprop='')
-
-df = pytrends.interest_over_time()
-print(df[df.love > 50])"""
 
