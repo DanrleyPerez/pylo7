@@ -159,10 +159,16 @@ class VendasDeSucesso:
 
 def run():
     termo = input(" Digite o Produto que busca ")
-    qte_produtos = int(input(" Digite a quantidade de Produtos que deseja analizar"))
+    qte_produtos = input(" Digite a quantidade de Produtos que deseja analizar")
+    if qte_produtos == "":
+        qte_produtos = 0
+    else:
+        qte_produtos = int(qte_produtos)
     prod = VendasDeSucesso(termo, qte_produtos)
     prod.plots()
+    produtos =prod.produtos()
     informacoes_gerais = prod.info_gerais()
+    print(produtos)
     print(informacoes_gerais)
 
 
