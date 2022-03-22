@@ -3,7 +3,8 @@ from pytrends.request import TrendReq
 import requests
 import re
 import ast
-
+import matplotlib.pyplot as plt
+import numpy as np
 
 def indice_palavra_string(arquivo, palavra):
     indice = re.search(str(palavra), arquivo)
@@ -64,7 +65,7 @@ def produtos_da_pagina(pagina):
     return conc
 
 
-def todos_produtos(produto_interesse):
+def todos_produtos(produto_interesse, espaco_amostral):
     todos_produtos = []
 
     numero_paginas = numero_de_paginas(produto_interesse)
@@ -72,24 +73,22 @@ def todos_produtos(produto_interesse):
         numero_paginas = 51
 
     for i in range(0, numero_paginas):
-        print("página, ", i)
+        print("página:", i)
         conteudo_pagina = captura_pagina(produto_interesse, i)
         produtos_pagina = produtos_da_pagina(conteudo_pagina)
 
         todos_produtos.append(produtos_pagina)
 
-    produtos_em_lista = tratamento_string(str(todos_produtos))
-    print(len(produtos_em_lista), " produtos encontrados")
+    produtos_em_lista = tratamento_string(str(todos_produtos), espaco_amostral)
+    print(len(produtos_em_lista), " produtos analizados")
     return produtos_em_lista
 
 
-def tratamento_string(produtos):
+def tratamento_string(produtos, espaco_amostral):
     prod = produtos.strip("[]")
     prod = prod.split("}")
     list_produtos_organizada = []
     n = 0
-    conc = ""
-    dict_produtos_organizada = {}
     for a in prod:
         n += 1
 
@@ -111,49 +110,68 @@ def tratamento_string(produtos):
                 qte_aspas = a.find('"')
                 if qte_aspas > 10:
                     a = a.replace('"', "", 8)
-
             try:
-                a = ast.literal_eval(a)
-                list_produtos_organizada.append(a)
+                if espaco_amostral != 0:
+                    if n <= espaco_amostral:
+                        a = ast.literal_eval(a)
+                        list_produtos_organizada.append(a)
+                else:
+                    a = ast.literal_eval(a)
+                    list_produtos_organizada.append(a)
             except:
                 pass
     return list_produtos_organizada
 
 
 class VendasDeSucesso:
-    def __init__(self, termo):
-        self.termo = termo
-        self.todos_os_produtos = todos_produtos(self.termo)
+    def __init__(self, termo, espaco_amostral=0):
+        """
 
-    def produtos_de_sucesso(self):
+        :param termo: O termo do produto ao qual deseja encontrar as informações.
+        :param espaco_amostral: numero de produtos que deseja, default = 0 : trás
+        todos os produtos encontrados.
+
+        """
+
+        self.termo = termo
+        self.espaco_amostral = espaco_amostral
+        self.todos_os_produtos = pd.DataFrame(todos_produtos(self.termo, espaco_amostral))
+
+    def produtos(self):
         return self.todos_os_produtos
 
     def tags_de_sucesso(self):
         pass
 
     def preco_mediano(self):
-        pd_produtos = pd.DataFrame(self.todos_os_produtos)
-        preco_mediano = pd_produtos['price'].median()
-        return preco_mediano
+        return self.todos_os_produtos['price'].median()
 
     def preco_medio(self):
-        pd_produtos = pd.DataFrame(self.todos_os_produtos)
-        preco_medio = pd_produtos['price'].mean()
-        return preco_medio
+        return self.todos_os_produtos['price'].mean()
 
     def info_gerais(self):
-        pd_produtos = pd.DataFrame(self.todos_os_produtos)
-        info_gerais = pd_produtos['price'].describe()
-        return info_gerais
+        return self.todos_os_produtos['price'].describe()
 
+    def plots(self):
+        preco_maximo = self.todos_os_produtos['price'].max()
+        graph = self.todos_os_produtos.plot.bar(title="Valor dos principais produtos por ordem de relevancia", xticks=self.todos_os_produtos.index, yticks=self.todos_os_produtos['price'])
+        graph.set_xlabel("Mais relevantes < -------- Relevância --------- > Menos relevantes")
+        graph.set_ylabel("Preço")
+        plt.yticks(np.arange(0, preco_maximo, 10))
+        if len(self.todos_os_produtos) > 50:
+            plt.xticks(np.arange(0, len(self.todos_os_produtos), len(self.todos_os_produtos)/10))
+        else:
+            plt.xticks(np.arange(0, self.espaco_amostral))
+        plt.show()
 
 
 def run():
     termo = input(" Digite o Produto que busca ")
-    prod = VendasDeSucesso(termo)
+    qte_produtos = int(input(" Digita a quantidade de Produtos que deseja analizar"))
+    prod = VendasDeSucesso(termo, qte_produtos)
+    prod.plots()
     informacoes_gerais = prod.info_gerais()
     print(informacoes_gerais)
-
 
 
 if __name__ == '__main__':
