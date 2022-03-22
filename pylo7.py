@@ -94,15 +94,11 @@ def tratamento_string(produtos, espaco_amostral):
         if n == len(prod):
             pass
         else:
-            a = str(a).strip("'")
-            a = a.strip("[") + "}"
-            a = a.replace("'", "")
-            a = a.replace("]", "")
-            a = a.replace("[", "")
+            a = str(a).strip("'").strip("[") + "}".replace("'", "").replace("]", "").replace("[", "")
             if a[0] == ",":
                 a = a.replace(",", "", 1)
-            a = a.replace("]", "", len(a))
-            a = a.replace("'[", "", 1)
+            a = a.replace("]", "", len(a)).replace("'[", "", 1)
+
             qte_aspas = a.count('"')
             if qte_aspas > 10:
                 a = a.replace('"', "", 8)
@@ -122,7 +118,7 @@ def tratamento_string(produtos, espaco_amostral):
     return list_produtos_organizada
 
 
-class Produtos:
+class VendasDeSucesso:
     def __init__(self, termo, espaco_amostral=0):
         """
 
@@ -167,7 +163,7 @@ class Produtos:
 def run():
     termo = input(" Digite o Produto que busca ")
     qte_produtos = int(input(" Digite a quantidade de Produtos que deseja analizar"))
-    prod = Produtos(termo, qte_produtos)
+    prod = VendasDeSucesso(termo, qte_produtos)
     prod.plots()
     informacoes_gerais = prod.info_gerais()
     print(informacoes_gerais)
