@@ -68,9 +68,11 @@ def todos_produtos(produto_interesse):
     todos_produtos = []
 
     numero_paginas = numero_de_paginas(produto_interesse)
-    print("numero de paginas", numero_paginas)
-    for i in range(0, 51):
-        print("pagina = ", i)
+    if numero_paginas > 51:
+        numero_paginas = 51
+
+    for i in range(0, numero_paginas):
+        print("página, ", i)
         conteudo_pagina = captura_pagina(produto_interesse, i)
         produtos_pagina = produtos_da_pagina(conteudo_pagina)
 
@@ -121,20 +123,37 @@ def tratamento_string(produtos):
 class VendasDeSucesso:
     def __init__(self, termo):
         self.termo = termo
+        self.todos_os_produtos = todos_produtos(self.termo)
 
     def produtos_de_sucesso(self):
-        todos_os_produtos = todos_produtos(self.termo)
-        return todos_os_produtos
+        return self.todos_os_produtos
 
     def tags_de_sucesso(self):
         pass
+
+    def preco_mediano(self):
+        pd_produtos = pd.DataFrame(self.todos_os_produtos)
+        preco_mediano = pd_produtos['price'].median()
+        return preco_mediano
+
+    def preco_medio(self):
+        pd_produtos = pd.DataFrame(self.todos_os_produtos)
+        preco_medio = pd_produtos['price'].mean()
+        return preco_medio
+
+    def info_gerais(self):
+        pd_produtos = pd.DataFrame(self.todos_os_produtos)
+        info_gerais = pd_produtos['price'].describe()
+        return info_gerais
+
 
 
 def run():
     termo = input(" Digite o Produto que busca ")
     prod = VendasDeSucesso(termo)
-    melhores_produtos = prod.produtos_de_sucesso()
-    print(melhores_produtos[0]['name'])
+    informacoes_gerais = prod.info_gerais()
+    print(informacoes_gerais)
+
 
 
 if __name__ == '__main__':
