@@ -132,6 +132,18 @@ class VendasDeSucesso:
     def produtos(self):
         return self.todos_os_produtos
 
+    def qte_palavras(self):
+        """
+        :return: lista da quantidade de palavras por anuncio em ordem de relevancia, do mais relevante para o menos
+        relevante.
+
+        """
+        qtd_palavras = []
+        for name in self.todos_os_produtos['name']:
+            palavras = name.split(" ")
+            qtd_palavras.append(len(palavras))
+        return qtd_palavras
+
     def tags_de_sucesso(self):
         pass
 
