@@ -122,7 +122,7 @@ def tratamento_string(produtos, espaco_amostral):
     return list_produtos_organizada
 
 
-class VendasDeSucesso:
+class Produtos:
     def __init__(self, termo, espaco_amostral=0):
         """
 
@@ -166,8 +166,8 @@ class VendasDeSucesso:
 
 def run():
     termo = input(" Digite o Produto que busca ")
-    qte_produtos = int(input(" Digita a quantidade de Produtos que deseja analizar"))
-    prod = VendasDeSucesso(termo, qte_produtos)
+    qte_produtos = int(input(" Digite a quantidade de Produtos que deseja analizar"))
+    prod = Produtos(termo, qte_produtos)
     prod.plots()
     informacoes_gerais = prod.info_gerais()
     print(informacoes_gerais)
@@ -175,4 +175,5 @@ def run():
 
 if __name__ == '__main__':
     run()
+
 
