@@ -5,9 +5,7 @@
 Para entender melhor a relação entre relevancia, vendas e as características dos anuncios como preços, tags, e outros parâmetros.
 
 ### Bibliotecas necessárias:
-    1. pandas
-    2. requests
-    3. re
-    4. ast
-    5. matplotlib
-    6. numpy
+    1. Pandas
+    2. Requests
+    5. Matplotlib
+    6. Numpy
